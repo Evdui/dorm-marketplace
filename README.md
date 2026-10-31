@@ -1,75 +1,72 @@
-# Dorm Marketplace 🏪
+## Automated Testing
 
-A campus-based marketplace where students can list, discover, and claim second-hand items for free or at a small price, with in-person handoffs.
+The backend includes automated API tests using Node.js's built-in test runner.
 
-## Features
+### Run API Tests
 
-- Create and browse marketplace listings.
-- Search listings and filter by category.
-- Claim available items.
-- Prevent multiple students from claiming the same item.
-- Automatically expire abandoned reservations after 60 seconds.
-- Confirm successful in-person pickups.
-- Allow sellers to mark listings as sold, even when a reservation is active.
-- Display real-time item status updates through periodic API polling.
-
-## Tech Stack
-
-**Frontend**
-- React
-- Vite
-- CSS
-- Fetch API
-
-**Backend**
-- Node.js
-- Express.js
-- CORS
-- In-memory state
-
-## Project Structure
-
-```text
-dorm-marketplace/
-├── client/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.jsx
-│   └── package.json
-│
-├── server/
-│   ├── server.js
-│   ├── test-concurrency.js
-│   └── package.json
-│
-├── PRD.md
-└── README.md
-```
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone YOUR_REPOSITORY_URL
-cd dorm-marketplace
-```
-
-### 2. Start the backend
+Start the backend in one terminal:
 
 ```bash
 cd server
-npm install
 npm run dev
 ```
 
-Backend URL: `http://localhost:5000`
+In a second terminal, run:
 
-### 3. Start the frontend
+```bash
+cd server
+npm test
+```
 
-Open another terminal:
+The automated test suite covers:
+
+- Retrieving marketplace listings
+- Rejecting invalid listing data
+- Claiming an available item and confirming pickup
+- Preventing duplicate claims
+- Handling simultaneous claim requests
+- Releasing expired reservations
+- Allowing sellers to override active reservations after an in-person sale
+- Enforcing buyer and seller permissions
+
+### Test Reservation Expiration
+
+For a faster expiration test, start the backend with a shortened reservation duration:
+
+```powershell
+cd server
+$env:CLAIM_DURATION_MS="1000"
+npm run dev
+```
+
+In another terminal, run:
+
+```powershell
+cd server
+npm test
+```
+
+The test environment uses a one-second reservation duration. The normal application defaults to 60 seconds.
+
+### Standalone Concurrency Test
+
+With the backend running, execute:
+
+```bash
+cd server
+node test-concurrency.js
+```
+
+This test sends two simultaneous claim requests and verifies that exactly one request succeeds.
+
+Expected responses:
+
+- **HTTP 200:** Successful reservation
+- **HTTP 409:** Item is no longer available
+
+### Frontend Setup
+
+In a separate terminal:
 
 ```bash
 cd client
@@ -77,37 +74,4 @@ npm install
 npm run dev
 ```
 
-Frontend URL: `http://localhost:5173`
-
-## Marketplace Rules
-
-- Each item can have only one active reservation.
-- Reservations expire after 60 seconds if pickup is not confirmed.
-- Buyers can confirm successful pickups.
-- Sellers can immediately mark their listings as sold.
-- Sellers cannot claim their own listings.
-
-## Testing
-
-Start the backend, then run:
-
-```bash
-cd server
-node test-concurrency.js
-```
-
-The concurrency test sends two simultaneous claim requests and verifies that only one succeeds.
-
-## Storage
-
-The prototype uses in-memory server storage. Listings and reservations reset when the backend restarts.
-
-## Scope Exclusions
-
-- Online payment processing.
-- Live chat.
-- Advanced search and recommendations.
-
-## Project Status
-
-Working prototype built as part of Kalvium AKD Milestone 2 — Challenge #10.
+Open `http://localhost:5173` to access the marketplace.
