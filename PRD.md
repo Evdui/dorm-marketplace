@@ -1,35 +1,86 @@
 # Dorm Marketplace — Product Requirements Document
 
-## 1. Scope Cut
+## 1. Problem Statement
 
-The following features are intentionally excluded from the Day 1 MVP:
+Students often have unused textbooks, electronics, stationery, and other useful items. Other students may need these items but lack a simple way to discover and exchange them within their campus community.
 
-1. **Online Payments:** Payment gateway integration is excluded because transactions will happen independently between students during in-person handoffs.
-2. **Live Chat:** Real-time messaging is excluded to keep the initial application focused on listing and claiming items.
-3. **Advanced Search and Recommendations:** Complex filtering and recommendation algorithms are excluded because basic item browsing is sufficient for the initial prototype.
+Dorm Marketplace provides a centralized platform for students to list, browse, reserve, and exchange second-hand items through in-person handoffs.
 
-## 2. MVP Features
+## 2. MVP Scope
 
-1. **Create and Browse Listings:** Students can create item listings with a title, description, price, category, and seller information. Other students can browse available listings.
-2. **Claim and Complete Handoff:** Students can claim available items and confirm successful in-person pickup. Each item can have only one active claim.
-3. **Listing and Claim State Management:** The system automatically expires abandoned claims and allows sellers to mark items as sold, ensuring listings remain accurate.
+### Included Features
 
-## 3. Acceptance Criteria
+- Create listings with a title, description, category, and price.
+- Browse and search available listings.
+- Filter listings by category.
+- Reserve an available item for a limited time.
+- Prevent multiple students from reserving the same item.
+- Automatically release reservations after 60 seconds.
+- Allow buyers to confirm successful pickup.
+- Allow sellers to mark an item sold after an in-person sale, even when an online reservation is active.
 
-### Acceptance Criterion 1 — Successful Claim
+## 3. Scope Cuts and Decisions
 
-- **Given:** An item is listed and currently available.
-- **When:** A student clicks the Claim Item button.
-- **Then:** The system creates a claim, reserves the item for that student, and updates its status to Reserved.
+The following features were intentionally excluded from the MVP:
 
-### Acceptance Criterion 2 — Concurrent Claim Prevention
+- **Online payments:** The project focuses on item discovery and reservation. Students complete exchanges in person, avoiding payment gateway integration and additional security requirements.
+- **Live chat:** Direct messaging is not essential to demonstrate the listing and reservation workflow. It would introduce additional real-time communication complexity.
+- **Advanced recommendations:** Basic search and category filters are sufficient for the initial marketplace. Recommendation algorithms would add complexity without being necessary to validate the core experience.
 
-- **Given:** An item is available and two students attempt to claim it simultaneously.
-- **When:** Both students submit their claim requests.
-- **Then:** Only one claim succeeds, while the other student receives an item no longer available message.
+These decisions keep the MVP focused on its primary purpose: reliable campus item exchanges.
 
-### Acceptance Criterion 3 — Expired Claim and Seller Override
+## 4. Acceptance Criteria — Given / When / Then
 
-- **Given:** An item has an active claim.
-- **When:** The claim expires without pickup confirmation, or the seller marks the item as sold.
-- **Then:** An expired claim makes the item available again, while a seller override immediately marks it as sold and invalidates the active claim.
+### Scenario 1: Successful Reservation and Pickup
+
+**Given** an item is available and a student is not its seller,
+
+**When** the student claims the item and confirms the in-person pickup,
+
+**Then** the item is reserved for that student and subsequently marked as sold.
+
+### Scenario 2: Simultaneous Claim Prevention
+
+**Given** an item is available,
+
+**When** two students attempt to claim the same item simultaneously,
+
+**Then** exactly one claim succeeds with HTTP 200, while the other receives HTTP 409, and only one active reservation exists.
+
+### Scenario 3: Reservation Expiration and Seller Override
+
+**Given** an item has an active reservation,
+
+**When** the reservation expires without pickup confirmation,
+
+**Then** the reservation is cleared and the item becomes available again.
+
+**And**, if the seller completes an in-person sale while an online reservation is active, the seller can mark the item as sold, clearing the reservation and preventing the previous buyer from confirming pickup.
+
+## 5. Business Rules
+
+- A seller cannot claim their own listing.
+- Only available items can be claimed.
+- Each item can have only one active reservation.
+- Reservations last 60 seconds.
+- Only the active buyer can confirm pickup.
+- Only the listing owner can mark an item as sold.
+- A seller's in-person sale override invalidates any active reservation.
+
+## 6. Technical Constraints
+
+- Frontend: React and Vite.
+- Backend: Node.js and Express.
+- Storage: In-memory state.
+- API communication: HTTP requests using Fetch.
+- Testing: Node.js built-in test runner and a simultaneous-claim test.
+
+## 7. Known Limitations
+
+- Listings and reservations reset when the backend restarts.
+- Student identity is simulated; production authentication is not implemented.
+- The in-memory concurrency protection is designed for a single Node.js server process, not multiple server instances.
+
+## 8. Success Criteria
+
+The MVP is successful when students can create and browse listings, reserve available items, complete pickups, and handle abandoned reservations or in-person sale overrides without allowing duplicate active claims.
