@@ -1,113 +1,44 @@
-# Dorm Marketplace 🏪
+## Automated Testing
 
-A campus-based marketplace where students can list, discover, and claim second-hand items for free or at a small price, with in-person handoffs.
+The backend includes automated API tests using Node.js's built-in test runner.
 
-## Features
+### Run API Tests
 
-- Create and browse marketplace listings.
-- Search listings and filter by category.
-- Claim available items.
-- Prevent multiple students from claiming the same item.
-- Automatically expire abandoned reservations after 60 seconds.
-- Confirm successful in-person pickups.
-- Allow sellers to mark listings as sold, even when a reservation is active.
-- Display real-time item status updates through periodic API polling.
-
-## Tech Stack
-
-**Frontend**
-- React
-- Vite
-- CSS
-- Fetch API
-
-**Backend**
-- Node.js
-- Express.js
-- CORS
-- In-memory state
-
-## Project Structure
-
-```text
-dorm-marketplace/
-├── client/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── App.css
-│   │   ├── index.css
-│   │   └── main.jsx
-│   └── package.json
-│
-├── server/
-│   ├── server.js
-│   ├── test-concurrency.js
-│   └── package.json
-│
-├── PRD.md
-└── README.md
-```
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone YOUR_REPOSITORY_URL
-cd dorm-marketplace
-```
-
-### 2. Start the backend
+Start the backend in one terminal:
 
 ```bash
 cd server
-npm install
 npm run dev
 ```
 
-Backend URL: `http://localhost:5000`
-
-### 3. Start the frontend
-
-Open another terminal:
+In another terminal, execute:
 
 ```bash
-cd client
-npm install
-npm run dev
+cd server
+npm test
 ```
 
-Frontend URL: `http://localhost:5173`
+The automated test suite covers:
 
-## Marketplace Rules
+- Retrieving marketplace listings.
+- Rejecting invalid listing data.
+- Successfully claiming an available item.
+- Preventing duplicate claims.
+- Restricting pickup confirmation to the claiming buyer.
+- Restricting seller override to the listing owner.
 
-- Each item can have only one active reservation.
-- Reservations expire after 60 seconds if pickup is not confirmed.
-- Buyers can confirm successful pickups.
-- Sellers can immediately mark their listings as sold.
-- Sellers cannot claim their own listings.
+### Concurrency Testing
 
-## Testing
-
-Start the backend, then run:
+Run:
 
 ```bash
 cd server
 node test-concurrency.js
 ```
 
-The concurrency test sends two simultaneous claim requests and verifies that only one succeeds.
+This test sends two simultaneous claim requests and verifies that exactly one request succeeds.
 
-## Storage
+The expected responses are:
 
-The prototype uses in-memory server storage. Listings and reservations reset when the backend restarts.
-
-## Scope Exclusions
-
-- Online payment processing.
-- Live chat.
-- Advanced search and recommendations.
-
-## Project Status
-
-Working prototype built as part of Kalvium AKD Milestone 2 — Challenge #10.
+- HTTP 200 — Successful reservation.
+- HTTP 409 — Item is no longer available.
