@@ -46,7 +46,7 @@ const items = [
   },
 ];
 
-const CLAIM_DURATION = 60 * 1000;
+const CLAIM_DURATION = Number(process.env.CLAIM_DURATION_MS) || 60 * 1000;
 
 // Release expired reservations
 function expireClaims() {
